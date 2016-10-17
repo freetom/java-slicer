@@ -1,0 +1,212 @@
+Java Slicer Plugin - Eclipse 4.4 Luna to ... Mars
+Author: Bortoli Tomas
+
+
+
+
+
+	\__\________	 ___				 ___	 _____________	  ___^____^____	  _____________
+	/  _	\\\\\	| #	|				/ ~	\	/\	__	__/\  \	 / \		   \ /	 \ _____/  \
+   /  /_____ \''\\	| #	|				| ~	|	| \/  |/\_\/  /	 |	\__________/ |	 //    //  |
+   | / \\	\\////	| #	|				| ~	|	| /	 ________/	 |	 |			 |	// [~]//   |
+   \ \	\\	/////	| #	|				| ~	|	| \	/			 |	 |________	 |  //____//  /
+	\ \	 \\_	   	| #	|				| ~	|	| /	|			 |	 		  \	 |	------\	 /
+	 \___   \		| #	|				| ~	|	| \	|			 |	!"£$%&/()=/	 |	_______\/
+  __  	\\ \ \		| #	|				| ~	|	| /	|			 |	 ________/	 |	 \
+    \__  \\	\ \		| #	|				| ~	|	| \	\_______	 |	|		 	 |  |  \
+   	/  \\_\\ \ \	| #	|___________	| ~	|	| \		_\/	\    |	|________	 |  \   \
+    \  		    \  	| #	# #	# #	# #	\	| ~	|	| /\_|\/\_\/ \   |	/		 \	 |  |\   \
+  	 \__________/ 	\__#_#_#_#_#_#_#_\ 	\_~_/	\/_________\_/	 \_/__________|	 \__| \___\
+
+
+
+
+
+ 										INTRODUCTION
+
+What is a slicer?
+A slicer is a program that takes in input a program P and one or more statement of the program, so
+a subset of the program - let's call it S. The core algorithm of the slicer find the subset of
+statements of the program that influence the statements in S. The result is called slice.
+
+	slice = slicer(P,S)
+	S contained in P
+	S contained in slice
+	slice contained in P
+
+A slicer computes the minimum slice if it returns the minimum set of statements for any possible input.
+(A perfect slicer)
+
+A slicer is made for a specific programming language, because from language to language change
+lots of things; the syntax, the semantic, and also lexicon rules.
+
+Why a slicer is useful?
+The usefulness of such a tool is applied in software development and assessment environments. 
+-The main purpose is to reduce the time to find out BUGS and their sources. Slicing by buggy statement, makes possible
+to find which are the statements that trigger the bug.
+-Bugs bring security flaws, and this is a fundamental problem with which software vendors 
+have to deal with. Even if lots of companies tries to ignore security as much as they can.
+-Another potential use is to make formal reviews of the code, verifying that the code works as it's 
+supposed to. 
+-To check the internal complexity of the code; this is just an hypothesis but could be used to know 
+which is the complexity of a certain project in terms of dependencies between the statements. The more 
+dependencies there are, the more a code is complex and the more statements are altered by a modification
+
+
+The IDEA of a slicer as an "easy" tool
+"easy" because is intended to be easy to use but not easy to develop. There will be a reason 
+because there is NO such a tool spread over the world. Is not easy to develop. 
+There are a couple of (dead)academic projects that aimed at it but they are difficult to get, 
+in the sense that they are not distributed easily and when you have them you see the non-effectiveness of them.
+They were gone out of topic, making a thing that must be easy too complicated for the standard developer.
+It's just another tool.
+
+WORKFLOW:
+The IDEA here is to do something really easy to use. A programmer can "mark/unmark" one or more statements 
+(he can perceive the marking by colors), of course keyboard shortcut are provided for this actions.
+And then just running the slicer (it should take very short amount of time, e.g <1-3 sec for 10000 LoC) 
+(better it it takes an eye blink)
+The result will be that the irrelevant statements (or piece of) will become transparent (e.g 80% transparency). 
+So it will be easier for the programmer to move into the code. 
+From a research in 2013 resulted that 50% of the 
+average amount of time that a developer spend in his work is on bug fixing. That's really sad.
+
+
+
+
+
+									
+											DESIGN OVERVIEW
+											
+The project targets the Java language and so all its shades.
+The code is divided in two main blocks. 
+-Plug-in wrapper (embedding the slicer into Eclipse IDE)
+-Slicer
+
+The plug-in wrapper handles the marking of code (Highlighting), the marking of the slice (Transparency)
+But also passing the slicing criterion to the slicer. It handle this tasks for all the files in a project.
+Also events like file closed and opened are handled by the wrapper, etc.
+
+The slicer computes slices of code from a slicing criterion(statements selected from the user)
+This package uses jdt library to evict java parsing implementation. Instead it works directly on ASTs (Abstract
+ syntax trees). All compilers builds AST of a program before transforming it into binary code or some bytecode.
+It's the normal procedure to compile code.
+For this reason is **useless** to re-implement an (AST generator || compiler non-architecture specific) for each language.
+
+The ALGORITHM:
+Everything in a program is based on variables. Indeed the slicer algorithm look for interesting variables to 
+"follow" and get the other statements that influence them and so on until saturation (no more variables to look 
+for)
+Java is a modern programming language, structured, object oriented, it has all the feature of a complete 
+programming language. 
+The basic IDEA here is to find WHICH statement modify WHICH variable. Statements can read or write variables.
+A special case of variable read is when is passed as parameter and if they are object (parameter for reference).
+-First an initialization part is required to run the dependencies algorithm. 
+Hash tables and other structures are created. 
+A global GRAPH built with 2 hash table identify the relations between variables and statements.
+Also method referencing and object referencing will construct tables.
+These data will be used in the dependency analysis to speed up the process.
+Methods have their reference. Return value could be made by external variables.
+Also, a method could modify an external variable (static or non static).
+
+This is basically a set of graphs that represent the interactions in a java program.
+Everything must be included. Variables, methods, classes, interfaces, calls, objects.
+
+Summary of the data structures:
+
+-AST for each module.
+
+-GRAPH of variable to statements and vice versa dependencies.
+   IS WRITTEN
+VAR ------> STMT
+
+    IS READ
+VAR ------> STMT
+
+     WRITE
+STMT -----> VAR
+
+      READ
+STMT -----> VAR
+
+-Dependencies for FUNCTIONS:
+
+On PARAMETER:
+FUN------------>{
+param 0 -> EMPTY
+param 1 -> param 0 //param 1 is modified by param0 in FUN
+param 2 -> a , param 1 //param 2 is modified by a and param1
+}
+
+to bind a parameter to a call that use it to become another parameter:
+FUN------->{
+CALL0 -> old_param,new_param
+CALL1 -> old_param,new_param
+}
+to handle nested (or recursive) modifications
+
+/////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+On RETURN:
+FUN------------>{
+param0, a ,b, param3
+}
+
+Also a list of @RetCall is made for RETURN
+
+/////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+On EXTERNAL VARIABLE:
+VAR -> LIST OF CALLS -> List of @Var that modify it
+
+/////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+So in brief, to make a slice we need to track or follow modifications of one or more variables. 
+Writes could be direct (on statement) or indirect (by method call). All the cases
+must be handled to compute a correct slice. We must also keep context statements, 
+because logic imply them.
+
+-The dependencies algorithm start with a set V of variables of interest.
+It find out all the statements that modify them and also add the new variables
+found in these statements to the V set. Then the process is repeated 
+until no new variable is found. In other words, convergence or saturation.
+Context preservation is applied to keep statements that wrap statements children
+in the slice.
+If an object is used as parameter, the algorithm check if it is modified inside the function 
+or in a nested call. Then it adds all the dependencies and go further.
+-If a var of interest is written with the result of one or more return, we want to
+ add the return's dependencies
+
+-A refine part in run now. Additional context statements are added
+(continue,break,empty statements of cycles and other structures in the slice)
+
+-Extract the effective slice from the original modules and pass the result back to the slicer_wrapper.
+
+Basically Slicing in 4 steps:
+-Init (could be done in background (and updated smartly) and prepare the data structures for the slicer) (is the most time expensive task)
+-Dependencies Algorithm
+-Refine
+-Extract
+
+*************************************************************************************************************************
+TO DO:
+Things left on are: 
+	-Handling of object passed to functions and check if modification of some field of the object happen into the function or in a nested one.
+	That field could be of interest or not.
+		*Tried to solve but incomplete solution ... to keep all cases, i think is better to modify the previous dependencies analysis impl. 
+		and add context sensitive informations, both in the "InitSlicing" and "DependencesAnalysis" parts. 
+		So if m.wtfuwant is responsible for the modification of #anything (means param or ext var), when they are looked up, i can add all the 
+		context sensitive information because of call invoked with "..." e.g parameter, or because i've to add the call because it modify ext var 
+		and param nested associations are very important.
+	
+	-External vars that calls methods (not defined by users) are kept but the relative parameters are not..
+	
+After this, slice generation should be mathematically correct.
+
+
+Perfect correctness is:
+Minimum slice, in other words, exclude all the variables not of interest. for example: 
+if a function must be in the slice but the ret value that is assigned to a var must not be in, 
+the var must be excluded.
+var={BEGIN_SLICE}function(a,b,c){END_SLICE}
+

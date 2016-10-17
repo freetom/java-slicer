@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+		point="org.eclipse.ui.startup">
+			<startup class="com.slicerplugin.generic.Activator"/>
+	</extension>
+	
+	<extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Sliced mode editor"
+            extensions="java"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="com.slicerplugin.editors.slicedModeEditor"
+            id="com.slicerplugin.editors.slicedModeEditor">
+      </editor>
+   	</extension>
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="Slice Category"
+            id="com.slicerPlugin.commands.category">
+      </category>
+      <command
+            name="Info"
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.infoSliceCommand">
+      </command>
+      <command
+            name="Mark"
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.MarkHandler">
+      </command>
+      <command
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.sliceCommand"
+            name="Slice">
+      </command>
+      <command
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.goSlice"
+            name="GoSlice">
+      </command>
+      <command
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.UnmarkHandler"
+            name="Unmark">
+      </command>
+      <command
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.RestoreHandler"
+            name="Restore">
+      </command>
+      <command
+            categoryId="com.slicerPlugin.commands.category"
+            id="com.slicerPlugin.commands.BackwardsHandler"
+            name="Backwards">
+      </command>
+   </extension>
+   
+   //Define the needed commands
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.slicerPlugin.commands.infoSliceCommand"
+            class="com.slicerplugin.handlers.InfoHandler">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.sliceCommand"
+            class="com.slicerplugin.handlers.SliceHandler">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.goSlice"
+            class="com.slicerplugin.handlers.goSlice">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.RestoreHandler"
+            class="com.slicerplugin.handlers.RestoreHandler">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.MarkHandler"
+            class="com.slicerplugin.handlers.MarkHandler">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.UnmarkHandler"
+            class="com.slicerplugin.handlers.UnmarkHandler">
+      </handler>
+      <handler
+            commandId="com.slicerPlugin.commands.BackwardsHandler"
+            class="com.slicerplugin.handlers.BackwardsHandler">
+      </handler>
+   </extension>
+   
+   //Define the keyboard shortcut
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.slicerPlugin.commands.UnmarkHandler"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+4">
+      </key>
+      <key
+            commandId="com.slicerPlugin.commands.MarkHandler"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+5">
+      </key>
+      <key
+            commandId="com.slicerPlugin.commands.sliceCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="com.slicerPlugin.commands.RestoreHandler"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+8"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="com.slicerPlugin.commands.goSlice"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+9"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="com.slicerPlugin.commands.BackwardsHandler"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+0"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.menus">
+         
+ 	  //Add the menu item
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="Slicer Plugin"
+               mnemonic="M"
+               id="com.slicerPlugin.menus.sliceMenu">
+            <command
+                  commandId="com.slicerPlugin.commands.infoSliceCommand"
+                  mnemonic="S"
+                  id="com.slicerPlugin.menus.sliceCommand">
+            </command>
+         </menu>
+      </menuContribution>
+      
+      //Add the toolbar button
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.slicerPlugin.toolbars.sliceToolbar">
+            <command
+                  commandId="com.slicerPlugin.commands.sliceCommand"
+                  icon="icons/slice.gif"
+                  tooltip="Slice your code!"
+                  id="com.slicerPlugin.toolbars.sliceCommand">
+            </command>
+            <command
+                  commandId="com.slicerPlugin.commands.goSlice"
+                  icon="icons/goSlice.png"
+                  tooltip="Go into Sliced Mode!"
+                  id="com.slicerPlugin.toolbars.goSlice">
+            </command>
+            <command
+                  commandId="com.slicerPlugin.commands.RestoreHandler"
+                  icon="icons/restore.png"
+                  tooltip="Restore your code!"
+                  id="com.slicerPlugin.toolbars.restoreCommand">
+            </command>
+            <command
+                  commandId="com.slicerPlugin.commands.BackwardsHandler"
+                  icon="icons/backSlice.png"
+                  tooltip="Go back to code state before the previous slice"
+                  id="com.slicerPlugin.toolbars.restoreCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="slicerPlugin.contribution1"
+            targetID="#CompilationUnitEditorContext">
+          
+          <action
+	       label="Unmark"
+	       icon="icons/unmark.png"
+	       class="com.slicerplugin.popup.actions.Unmark"
+		   menubarPath="additions" 
+	       enablesFor="*"
+	       id="slicerPlugin.Unmark">
+		   </action>
+		   
+		   <action
+	       label="Mark"
+	       icon="icons/slice.gif"
+	       class="com.slicerplugin.popup.actions.Mark"
+		   menubarPath="additions" 
+	       enablesFor="*"
+	       id="slicerPlugin.Mark">
+		   </action>
+		   
+      </viewerContribution>
+   </extension>
+   
+   <extension id="com.slicerPlugin.generic.myMarker"
+              name="myMarker"
+              point="org.eclipse.core.resources.markers"
+              >
+      <super type="org.eclipse.core.resources.textmarker"/>
+      <persistent value="false"/>
+ </extension>
+ 
+ <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+		id="myAnnotationspecification" name="myAnnotation">
+	<specification annotationType="slicerPlugin.myAnnotation"
+			label="MyAnnotation"
+			icon="icons/transparent.gif"
+			verticalRulerPreferenceKey="highlight.rulers.vertical"
+             textPreferenceKey="highlight.text"
+            colorPreferenceKey="highlight.text"
+            highlightPreferenceKey="highlight.background"
+            textPreferenceValue="true"
+            textStylePreferenceValue="NONE"
+            overviewRulerPreferenceKey="highlight.rulers.overview"
+            highlightPreferenceValue="true"
+            symbolicIcon="info"
+            colorPreferenceValue="0,255,0"
+            verticalRulerPreferenceValue="false"
+            overviewRulerPreferenceValue="true"
+            textStylePreferenceKey="highlight.text.style" >
+			
+	</specification>
+</extension>
+ 
+ <extension point="org.eclipse.ui.editors.markerUpdaters"> 
+               <updater
+                       id="slicerPlugin.MarkerUpdater"
+                       class="com.slicerplugin.generic.MarkerUpdater"
+                       markerType="slicerPlugin.myMarker">
+               </updater>
+</extension>:
+
+
+
+ </plugin>
