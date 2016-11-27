@@ -119,7 +119,7 @@ public class ExtDep extends Dep{
 				}
 				deps_.add(v);
 			}
-			
+			total.clear();
 		}
 		
 		
